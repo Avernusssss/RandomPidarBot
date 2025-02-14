@@ -37,11 +37,7 @@ dp = Dispatcher()
 
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    await message.answer('Ищу пидора дня...')
-    # Ждем 5 секунд
-    await asyncio.sleep(5)
-    # Отправляем первое сообщение
-    await send_daily_message()
+    await message.answer('Теперь я буду искать пидоров')
 
 async def send_daily_message():
     selected_user_id, selected_user_name = random.choice(USERS)
@@ -53,7 +49,7 @@ async def send_daily_message():
     )
 
 async def scheduler():
-    aioschedule.every().day.at("09:00").do(send_daily_message)
+    aioschedule.every().day.at("20:20").do(send_daily_message)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(1)
