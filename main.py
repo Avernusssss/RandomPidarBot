@@ -49,7 +49,7 @@ async def send_daily_message():
     )
 
 async def scheduler():
-    aioschedule.every().day.at("20:20").do(send_daily_message)
+    aioschedule.every().day.at("09:00").do(send_daily_message)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(1)
