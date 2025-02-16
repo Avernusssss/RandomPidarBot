@@ -6,6 +6,7 @@ from datetime import datetime
 import aioschedule
 from dotenv import load_dotenv
 import os
+import pytz
 
 # Загружаем переменные из .env файла
 load_dotenv()
@@ -16,9 +17,9 @@ CHAT_ID = os.getenv('CHAT_ID')
 
 # Список пользователей в формате (user_id, имя)
 USERS = [
-    (637476473, "Никиточка Гекон"),
-    (944818724, "Андроид Эндрю"),
-    (2012379285, "Десептикон Семён"),
+    (637476473, "Гекон"),
+    (944818724, "Андроид"),
+    (2012379285, "Десептикон"),
     (795615948, "Лупа Залупа"),
     (1303275983, "Лера Писька"),
     (5623885884, "вЕталЕГ"),
@@ -64,10 +65,27 @@ async def send_daily_message():
     )
 
 async def scheduler():
-    aioschedule.every().day.at("09:00").do(send_daily_message)
+    moscow_tz = pytz.timezone('Europe/Moscow')
+    
     while True:
-        await aioschedule.run_pending()
-        await asyncio.sleep(1)
+        now = datetime.now(moscow_tz)
+        
+        # Вычисляем время до следующих 09:00
+        if now.hour >= 9:
+            # Если сейчас 9 утра или позже, ждём до завтра
+            next_run = now.replace(day=now.day + 1, hour=9, minute=0, second=0, microsecond=0)
+        else:
+            # Если сейчас раньше 9 утра, ждём до 9 утра сегодня
+            next_run = now.replace(hour=9, minute=0, second=0, microsecond=0)
+        
+        # Вычисляем количество секунд до следующего запуска
+        delay = (next_run - now).total_seconds()
+        
+        # Ждём до следующего запуска
+        await asyncio.sleep(delay)
+        
+        # Отправляем сообщение
+        await send_daily_message()
 
 async def main():
     # Отправляем первое сообщение при запуске
