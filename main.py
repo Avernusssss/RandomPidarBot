@@ -3,8 +3,8 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters.command import Command
 import random
 from datetime import datetime
-import aioschedule
 from dotenv import load_dotenv
+import aioschedule
 import os
 import pytz
 
