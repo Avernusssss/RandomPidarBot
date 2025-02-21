@@ -225,15 +225,36 @@ async def main():
     # Инициализируем базу данных при запуске
     init_db()
     
-    # Отправляем первое сообщение при запуске
-    await bot.send_message(chat_id=CHAT_ID, text="Меня ебали, я сосал")
-    await asyncio.sleep(5)
-    await send_daily_message()
-    
-    # Запускаем планировщик в отдельной задаче
-    asyncio.create_task(scheduler())
-    # Запускаем бота
-    await dp.start_polling(bot)
+    try:
+        # Проверяем валидность CHAT_ID
+        if not CHAT_ID:
+            print("Error: CHAT_ID is not set in .env file")
+            return
+            
+        # Проверяем возможность отправки сообщений в чат
+        try:
+            await bot.send_message(chat_id=CHAT_ID, text="Бот запущен и готов сосать")
+        except Exception as e:
+            print(f"Error sending message to chat: {e}")
+            print("Please check if:")
+            print("1. The bot is a member of the chat")
+            print("2. The CHAT_ID is correct")
+            print("3. The bot has permission to send messages in the chat")
+            return
+            
+        # Отправляем первое сообщение дня
+        await send_daily_message()
+        
+        # Запускаем планировщик в отдельной задаче
+        asyncio.create_task(scheduler())
+        # Запускаем бота
+        await dp.start_polling(bot)
+        
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+    finally:
+        # Закрываем сессию бота при выходе
+        await bot.session.close()
 
 if __name__ == '__main__':
     asyncio.run(main())
